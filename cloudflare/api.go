@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ViRb3/wgcf/config"
-	"github.com/ViRb3/wgcf/openapi"
-	"github.com/ViRb3/wgcf/util"
-	"github.com/ViRb3/wgcf/wireguard"
+	"github.com/ViRb3/wgcf/v2/config"
+	"github.com/ViRb3/wgcf/v2/openapi"
+	"github.com/ViRb3/wgcf/v2/util"
+	"github.com/ViRb3/wgcf/v2/wireguard"
 )
 
 const (
@@ -102,24 +102,16 @@ func GetAccount(ctx *config.Context) (*Account, error) {
 	return &castResult, err
 }
 
-func UpdateLicenseKey(ctx *config.Context, newPublicKey string) (*openapi.UpdateAccount200Response, *Device, error) {
+func UpdateLicenseKey(ctx *config.Context) (*openapi.UpdateAccount200Response, error) {
 	result, _, err := globalClientAuth(ctx.AccessToken).DefaultApi.
 		UpdateAccount(nil, ctx.DeviceId, ApiVersion).
 		UpdateAccountRequest(openapi.UpdateAccountRequest{License: ctx.LicenseKey}).
 		Execute()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	// change public key as per official client
-	result2, _, err := globalClientAuth(ctx.AccessToken).DefaultApi.
-		UpdateSourceDevice(nil, ApiVersion, ctx.DeviceId).
-		UpdateSourceDeviceRequest(openapi.UpdateSourceDeviceRequest{Key: newPublicKey}).
-		Execute()
-	castResult := Device(result2)
-	if err != nil {
-		return nil, nil, err
-	}
-	return &result, &castResult, nil
+
+	return &result, nil
 }
 
 type BoundDevice openapi.GetBoundDevices200Response
